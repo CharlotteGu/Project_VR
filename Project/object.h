@@ -36,7 +36,7 @@ public:
 	glm::mat4 model = glm::mat4(1.0);
 
 	Object(const char* path) {
-
+		// Get the object information from the file
 		std::ifstream infile(path);
 		if (!infile){
 			std::cerr << "File could not be opened!\n"; // Report error
@@ -118,14 +118,8 @@ public:
 		numVertices = vertices.size();
 	}
 
-
-
 	void makeObject(Shader shader, bool texture = true, bool normal = true) {
-		/* This is a working but not perfect solution, you can improve it if you need/want
-		* What happens if you call this function twice on an Model ?
-		* What happens when a shader doesn't have a position, tex_coord or normal attribute ?
-		*/
-
+		// Put the object information in the buffer for the shader to read
 		float* data = new float[8 * numVertices];
 		for (int i = 0; i < numVertices; i++) {
 			Vertex v = vertices.at(i);
@@ -158,7 +152,6 @@ public:
 			auto att_tex = glGetAttribLocation(shader.ID, "tex_coord");
 			glEnableVertexAttribArray(att_tex);
 			glVertexAttribPointer(att_tex, 2, GL_FLOAT, false, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-			
 		}
 		
 		if (normal){
@@ -175,7 +168,6 @@ public:
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
 		delete[] data;
-
 	}
 
 	void draw() {

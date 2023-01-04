@@ -21,57 +21,6 @@ GLuint compileProgram(GLuint vertexShader, GLuint fragmentShader);
 void processInput(GLFWwindow* window);
 void loadCubemapFace(const char * file, const GLenum& targetCube);
 
-#ifndef NDEBUG
-void APIENTRY glDebugOutput(GLenum source,
-	GLenum type,
-	unsigned int id,
-	GLenum severity,
-	GLsizei length,
-	const char* message,
-	const void* userParam)
-{
-	// ignore non-significant error/warning codes
-	if (id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
-
-	std::cout << "---------------" << std::endl;
-	std::cout << "Debug message (" << id << "): " << message << std::endl;
-
-	switch (source)
-	{
-	case GL_DEBUG_SOURCE_API:             std::cout << "Source: API"; break;
-	case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   std::cout << "Source: Window System"; break;
-	case GL_DEBUG_SOURCE_SHADER_COMPILER: std::cout << "Source: Shader Compiler"; break;
-	case GL_DEBUG_SOURCE_THIRD_PARTY:     std::cout << "Source: Third Party"; break;
-	case GL_DEBUG_SOURCE_APPLICATION:     std::cout << "Source: Application"; break;
-	case GL_DEBUG_SOURCE_OTHER:           std::cout << "Source: Other"; break;
-	} std::cout << std::endl;
-
-	switch (type)
-	{
-	case GL_DEBUG_TYPE_ERROR:               std::cout << "Type: Error"; break;
-	case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: std::cout << "Type: Deprecated Behaviour"; break;
-	case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  std::cout << "Type: Undefined Behaviour"; break;
-	case GL_DEBUG_TYPE_PORTABILITY:         std::cout << "Type: Portability"; break;
-	case GL_DEBUG_TYPE_PERFORMANCE:         std::cout << "Type: Performance"; break;
-	case GL_DEBUG_TYPE_MARKER:              std::cout << "Type: Marker"; break;
-	case GL_DEBUG_TYPE_PUSH_GROUP:          std::cout << "Type: Push Group"; break;
-	case GL_DEBUG_TYPE_POP_GROUP:           std::cout << "Type: Pop Group"; break;
-	case GL_DEBUG_TYPE_OTHER:               std::cout << "Type: Other"; break;
-	} std::cout << std::endl;
-
-	switch (severity)
-	{
-	case GL_DEBUG_SEVERITY_HIGH:         std::cout << "Severity: high"; break;
-	case GL_DEBUG_SEVERITY_MEDIUM:       std::cout << "Severity: medium"; break;
-	case GL_DEBUG_SEVERITY_LOW:          std::cout << "Severity: low"; break;
-	case GL_DEBUG_SEVERITY_NOTIFICATION: std::cout << "Severity: notification"; break;
-	} std::cout << std::endl;
-	std::cout << std::endl;
-}
-#endif
-
-
-
 
 Camera camera(glm::vec3(0.0, 0.0, 0.1));
 
@@ -85,13 +34,8 @@ int main(int argc, char* argv[])
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-#ifndef NDEBUG
-	//create a debug context to help with Debugging
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-#endif
-
 	//Create the window
-	GLFWwindow* window = glfwCreateWindow(width, height, "Exercise 08", nullptr, nullptr);
+	GLFWwindow* window = glfwCreateWindow(width, height, "Project", nullptr, nullptr);
 	if (window == NULL)
 	{
 		glfwTerminate();
@@ -107,23 +51,11 @@ int main(int argc, char* argv[])
 
 	glEnable(GL_DEPTH_TEST);
 
-#ifndef NDEBUG
-	int flags;
-	glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-	if (flags & GL_CONTEXT_FLAG_DEBUG_BIT)
-	{
-		glEnable(GL_DEBUG_OUTPUT);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback(glDebugOutput, nullptr);
-		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-	}
-#endif
-
 /*------------------ Sun handling ------------------ */
 
 	const std::string sourceV = "#version 330 core\n"
 		"in vec3 position; \n"
-		"in vec2 tex_coords; \n"
+		"in vec2 tex_coord; \n"
 		"in vec3 normal; \n"
 
 		"out vec3 v_frag_coord; \n"
@@ -137,12 +69,12 @@ int main(int argc, char* argv[])
 
 
 		" void main(){ \n"
-		"vec4 frag_coord = M*vec4(position, 1.0); \n"
-		"gl_Position = P*V*frag_coord; \n"
-		"v_normal = vec3(itM * vec4(normal, 1.0)); \n"
-		"v_frag_coord = frag_coord.xyz; \n"
-		"v_tex = tex_coords;\n"
-		"\n" 
+			"vec4 frag_coord = M*vec4(position, 1.0); \n"
+			"gl_Position = P*V*frag_coord; \n"
+			"v_normal = vec3(itM * vec4(normal, 1.0)); \n"
+			"v_frag_coord = frag_coord.xyz; \n"
+			"v_tex = tex_coord;\n"
+			"\n" 
 		"}\n";
 
 	const std::string sourceF = "#version 330 core\n"
@@ -207,7 +139,7 @@ int main(int argc, char* argv[])
 	stbi_set_flip_vertically_on_load(true);
 
 	int imWidth, imHeight, imNrChannels;
-	char file[128] = PATH_TO_TEXTURE "/horse.jpg";
+	char file[128] = PATH_TO_TEXTURE "/sun.jpg";
 	unsigned char* data = stbi_load(file, &imWidth, &imHeight, &imNrChannels, 0);
 	if (data)
 	{
@@ -232,7 +164,7 @@ int main(int argc, char* argv[])
 /*------------------ Cubmap handling ------------------ */
 	const std::string sourceVCubeMap = "#version 330 core\n"
 		"in vec3 position; \n"
-		"in vec2 tex_coords; \n"
+		"in vec2 tex_coord; \n"
 		"in vec3 normal; \n"
 		
 		//only P and V are necessary
@@ -271,7 +203,7 @@ int main(int argc, char* argv[])
 	Object cubeMap(pathCube);
 	cubeMap.makeObject(cubeMapShader);
 
-		GLuint cubeMapTexture;
+	GLuint cubeMapTexture;
 	glGenTextures(1, &cubeMapTexture);
 	//glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);

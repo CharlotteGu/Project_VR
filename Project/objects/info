@@ -1,0 +1,12 @@
+The OBJ file format is a simple data-format that represents 3D geometry alone — namely, 
+		the position of each vertex, 						=> v x y z
+		the UV position of each texture coordinate vertex,	=> vt x y
+		vertex normals,										=> vn x y z
+		and the faces that make each polygon defined as a list of vertices, and texture vertices. 
+			=> f v1/vt1/vn1 ... so for each of the component of the face, we have the identifier (num) of its vertice, texture and normal
+			btw, if same normal for all vertices of a face, flat-shading
+		
+		Vertices are stored in a counter-clockwise order by default, 
+		making explicit declaration of face normals unnecessary. 
+		
+		OBJ coordinates have no units, but OBJ files can contain scale information in a human readable comment line.
