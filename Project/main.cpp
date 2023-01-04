@@ -52,80 +52,9 @@ int main(int argc, char* argv[])
 	glEnable(GL_DEPTH_TEST);
 
 /*------------------ Sun handling ------------------ */
-
-	const std::string sourceV = "#version 330 core\n"
-		"in vec3 position; \n"
-		"in vec2 tex_coord; \n"
-		"in vec3 normal; \n"
-
-		"out vec3 v_frag_coord; \n"
-		"out vec2 v_tex; \n"
-		"out vec3 v_normal; \n"
-
-		"uniform mat4 M; \n"
-		"uniform mat4 itM; \n"
-		"uniform mat4 V; \n"
-		"uniform mat4 P; \n"
-
-
-		" void main(){ \n"
-			"vec4 frag_coord = M*vec4(position, 1.0); \n"
-			"gl_Position = P*V*frag_coord; \n"
-			"v_normal = vec3(itM * vec4(normal, 1.0)); \n"
-			"v_frag_coord = frag_coord.xyz; \n"
-			"v_tex = tex_coord;\n"
-			"\n" 
-		"}\n";
-
-	const std::string sourceF = "#version 330 core\n"
-		"out vec4 FragColor;\n"
-		"precision mediump float; \n"
-
-		"in vec3 v_frag_coord; \n"
-		"in vec3 v_normal; \n"
-		"in vec2 v_tex; \n"
-
-		"uniform vec3 u_view_pos; \n"
-		"uniform sampler2D u_texture; \n"
-
-		//In GLSL you can use structures to better organize your code
-		//light
-		"struct Light{\n" 
-			"vec3 light_pos; \n"
-			"float ambient_strength; \n"
-			"float diffuse_strength; \n"
-			"float specular_strength; \n"
-			//attenuation factor
-			"float constant;\n"
-			"float linear;\n"
-			"float quadratic;\n"
-		"};\n"
-		"uniform Light light;"
-
-		"uniform float shininess; \n"
-		"uniform vec3 materialColour; \n"
-
-
-		"float specularCalculation(vec3 N, vec3 L, vec3 V ){ \n"
-			"vec3 R = reflect (-L,N);  \n " //reflect (-L,N) is  equivalent to //max (2 * dot(N,L) * N - L , 0.0) ;
-			"float cosTheta = dot(R , V); \n"
-			"float spec = pow(max(cosTheta,0.0), 32.0); \n"
-			"return light.specular_strength * spec;\n"
-		"}\n"
-
-		"void main() { \n"
-			"vec3 N = normalize(v_normal);\n"
-			"vec3 L = normalize(light.light_pos - v_frag_coord) ; \n"
-			"vec3 V = normalize(u_view_pos - v_frag_coord); \n"
-			"float specular = specularCalculation( N, L, V); \n"
-			"float diffuse = light.diffuse_strength * max(dot(N,L),0.0);\n"
-			"float distance = length(light.light_pos - v_frag_coord);"
-			"float attenuation = 1 / (light.constant + light.linear * distance + light.quadratic * distance * distance);"
-			"float light = light.ambient_strength + attenuation * (diffuse + specular); \n"
-			//"FragColor = vec4(materialColour * vec3(light), 1.0); \n"
-			"FragColor = texture(u_texture, v_tex); \n"
-		"} \n";
-	Shader shader(sourceV, sourceF);
+	char fileVert[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/sunV.txt";	
+	char fileFrag[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/sunF.txt";
+	Shader shader(fileVert, fileFrag);
 
 	GLuint texture;
 	glGenTextures(1, &texture);
@@ -195,7 +124,6 @@ int main(int argc, char* argv[])
 		"void main() { \n"
 		"FragColor = texture(cubemapSampler,texCoord_v); \n"
 		"} \n";
-
 
 	Shader cubeMapShader = Shader(sourceVCubeMap, sourceFCubeMap);
 
