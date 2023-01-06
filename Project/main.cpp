@@ -309,7 +309,8 @@ int main(int argc, char* argv[])
 		glBindTexture(GL_TEXTURE_2D, texturePlanet);
 			//show the result
 		glDepthFunc(GL_LEQUAL); //Show the object even if it's depth is equal to the depht of the object already present
-		modelPlanet = glm::rotate(modelPlanet,glm::radians((float)(1.0)),glm::vec3(0.0,1.0,0.0));
+		//modelPlanet = glm::translate(modelPlanet, glm::vec3(0.1,0.0,0.0));
+		modelPlanet = glm::rotate(modelPlanet,glm::radians((float)(1.0)),glm::vec3(0.0,2.0,0.0));
 		planet.draw();
 
 		//CUBEMAP
