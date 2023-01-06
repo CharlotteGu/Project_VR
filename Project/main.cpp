@@ -51,14 +51,17 @@ int main(int argc, char* argv[])
 
 	glEnable(GL_DEPTH_TEST);
 
-/*------------------ Sun handling ------------------ */
-	char fileVert[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/sunV.txt";	
-	char fileFrag[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/sunF.txt";
-	Shader shader(fileVert, fileFrag);
+	unsigned char* data;
+	
 
-	GLuint texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+/*------------------ Sun handling ------------------ */
+	char sunV[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/sunV.txt";	
+	char sunF[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/sunF.txt";
+	Shader shaderSun(sunV, sunF);
+
+	GLuint textureSun;
+	glGenTextures(1, &textureSun);
+	glBindTexture(GL_TEXTURE_2D, textureSun);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
@@ -68,8 +71,8 @@ int main(int argc, char* argv[])
 	stbi_set_flip_vertically_on_load(true);
 
 	int imWidth, imHeight, imNrChannels;
-	char file[128] = PATH_TO_TEXTURE "/sun.jpg";
-	unsigned char* data = stbi_load(file, &imWidth, &imHeight, &imNrChannels, 0);
+	char texSun[128] = PATH_TO_TEXTURE "/sun.jpg";
+	data = stbi_load(texSun, &imWidth, &imHeight, &imNrChannels, 0);
 	if (data)
 	{
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imWidth, imHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -81,14 +84,50 @@ int main(int argc, char* argv[])
 		std::cout << reason << std::endl;
 	}
 
-	char path[] = PATH_TO_OBJECTS "/sphere_smooth.obj";
-	Object sphere(path);
-	sphere.makeObject(shader);
+	char pathSun[] = PATH_TO_OBJECTS "/sphere_smooth.obj";
+	Object sun(pathSun);
+	sun.makeObject(shaderSun);
 
 	//clean up texture
 	stbi_image_free(data);
 	stbi_set_flip_vertically_on_load(false);
 
+/*------------------ Planet handling ------------------ */
+	char planetV[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/planetV.txt";	
+	char planetF[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/planetF.txt";
+	Shader shaderPlanet(planetV, planetF);
+
+	GLuint texturePlanet;
+	glGenTextures(1, &texturePlanet);
+	glBindTexture(GL_TEXTURE_2D, texturePlanet);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	stbi_set_flip_vertically_on_load(true);
+
+	char texPlanet[128] = PATH_TO_TEXTURE "/planet.jpg";
+	data = stbi_load(texPlanet, &imWidth, &imHeight, &imNrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imWidth, imHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Failed to Load texture" << std::endl;
+		const char* reason = stbi_failure_reason();
+		std::cout << reason << std::endl;
+	}
+
+	char pathPlanet[] = PATH_TO_OBJECTS "/sphere_smooth.obj";
+	Object planet(pathPlanet);
+	planet.makeObject(shaderPlanet);
+
+	//clean up texture
+	stbi_image_free(data);
+	stbi_set_flip_vertically_on_load(false);
 
 /*------------------ Cubmap handling ------------------ */
 	const std::string sourceVCubeMap = "#version 330 core\n"
@@ -107,7 +146,7 @@ int main(int argc, char* argv[])
 		//remove translation info from view matrix to only keep rotation
 		"mat4 V_no_rot = mat4(mat3(V)) ;\n"
 		"vec4 pos = P * V_no_rot * vec4(position, 1.0); \n"
-		// the positions xyz are divided by w after the vertex shader
+		// the positions xyz are divided by w after the vertex shaderSun
 		// the z component is equal to the depth value
 		// we want a z always equal to 1.0 here, so we set z = w!
 		// Remember: z=1.0 is the MAXIMUM depth value ;)
@@ -115,8 +154,7 @@ int main(int argc, char* argv[])
 		"\n" 
 		"}\n";
 
-	const std::string sourceFCubeMap = 
-		"#version 330 core\n"
+	const std::string sourceFCubeMap = "#version 330 core\n"
 		"out vec4 FragColor;\n"
 		"precision mediump float; \n"
 		"uniform samplerCube cubemapSampler; \n"
@@ -125,6 +163,8 @@ int main(int argc, char* argv[])
 		"FragColor = texture(cubemapSampler,texCoord_v); \n"
 		"} \n";
 
+	char cubemapV[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/cubemapV.txt";	
+	char cubemapF[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/cubemapF.txt";
 	Shader cubeMapShader = Shader(sourceVCubeMap, sourceFCubeMap);
 
 	char pathCube[] = PATH_TO_OBJECTS "/cube.obj";
@@ -179,14 +219,20 @@ int main(int argc, char* argv[])
 
 /*------------------ Camera elements + light + potential uniforme ------------------ */
 	//light source
-	glm::vec3 light_pos = glm::vec3(1.0, 2.0, 1.5);
+	glm::vec3 light_pos = glm::vec3(0.0, 0.0, -2.0); //same position as sun, such that it is the light source
 
 	//sun model
-	glm::mat4 model = glm::mat4(1.0);
-	model = glm::translate(model, glm::vec3(0.0, 0.0, -2.0));
-	model = glm::scale(model, glm::vec3(0.5, 0.5, 0.5));
+	glm::mat4 modelSun = glm::mat4(1.0);
+	modelSun = glm::translate(modelSun, glm::vec3(0.0, 0.0, -5.0));
+	modelSun = glm::scale(modelSun, glm::vec3(0.85, 0.85, 0.85));
 
-	glm::mat4 inverseModel = glm::transpose(glm::inverse(model));
+	glm::mat4 inverseModelSun = glm::transpose(glm::inverse(modelSun));
+
+	//planet model
+	glm::mat4 modelPlanet = glm::mat4(1.0);
+	modelPlanet = glm::translate(modelPlanet, glm::vec3(0.3, 0.3, -2.0));
+	modelPlanet = glm::scale(modelPlanet, glm::vec3(0.4, 0.4, 0.4));
+	glm::mat4 inverseModelPlanet = glm::transpose(glm::inverse(modelPlanet));
 
 	//camera info
 	glm::mat4 view = camera.GetViewMatrix();
@@ -201,17 +247,17 @@ int main(int argc, char* argv[])
 	glm::vec3 materialColour = glm::vec3(0.5f,0.6,0.8);
 	
 
-/*------------------ Passing values to shader ------------------ */
+/*------------------ Passing values to shaderSun ------------------ */
 
-	shader.use();
-	shader.setFloat("shininess", 32.0f);
-	shader.setVector3f("materialColour", materialColour);
-	shader.setFloat("light.ambient_strength", ambient);
-	shader.setFloat("light.diffuse_strength", diffuse);
-	shader.setFloat("light.specular_strength", specular);
-	shader.setFloat("light.constant", 1.0);
-	shader.setFloat("light.linear", 0.14);
-	shader.setFloat("light.quadratic", 0.07);
+	shaderSun.use();
+	shaderSun.setFloat("shininess", 32.0f);
+	shaderSun.setVector3f("materialColour", materialColour);
+	shaderSun.setFloat("light.ambient_strength", ambient);
+	shaderSun.setFloat("light.diffuse_strength", diffuse);
+	shaderSun.setFloat("light.specular_strength", specular);
+	shaderSun.setFloat("light.constant", 1.0);
+	shaderSun.setFloat("light.linear", 0.14);
+	shaderSun.setFloat("light.quadratic", 0.07);
 
 
 	
@@ -229,22 +275,42 @@ int main(int argc, char* argv[])
 
 		//SUN
 			//give sun information to shaders
-		shader.use();
-		shader.setMatrix4("M", model);
-		shader.setMatrix4("itM", inverseModel);
-		shader.setMatrix4("V", view);
-		shader.setMatrix4("P", perspective);
-		shader.setVector3f("u_view_pos", camera.Position);
+		shaderSun.use();
+		shaderSun.setMatrix4("M", modelSun);
+		shaderSun.setMatrix4("itM", inverseModelSun);
+		shaderSun.setMatrix4("V", view);
+		shaderSun.setMatrix4("P", perspective);
+		shaderSun.setVector3f("u_view_pos", camera.Position);
 			//light
-		auto delta = light_pos + glm::vec3(0.0,0.0,2 * std::sin(now));
-		shader.setVector3f("light.light_pos", delta);
+		auto deltaSun = light_pos + glm::vec3(0.0,0.0,2 * std::sin(now));
+		shaderSun.setVector3f("light.light_pos", deltaSun);
 			//texture
-		shader.setInteger("u_texture", 0);
+		shaderSun.setInteger("u_texture", 0);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glBindTexture(GL_TEXTURE_2D, textureSun);
 			//show the result
 		glDepthFunc(GL_LEQUAL); //Show the object even if it's depth is equal to the depht of the object already present
-		sphere.draw();
+		sun.draw();
+
+		//PLANET
+			//give sun information to shaders
+		shaderPlanet.use();
+		shaderPlanet.setMatrix4("M", modelPlanet);
+		shaderPlanet.setMatrix4("itM", inverseModelPlanet);
+		shaderPlanet.setMatrix4("V", view);
+		shaderPlanet.setMatrix4("P", perspective);
+		shaderPlanet.setVector3f("u_view_pos", camera.Position);
+			//light
+		auto deltaPlanet = light_pos + glm::vec3(0.0,0.0,2 * std::sin(now));
+		shaderPlanet.setVector3f("light.light_pos", deltaPlanet);
+			//texture
+		shaderPlanet.setInteger("u_texture", 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texturePlanet);
+			//show the result
+		glDepthFunc(GL_LEQUAL); //Show the object even if it's depth is equal to the depht of the object already present
+		modelPlanet = glm::rotate(modelPlanet,glm::radians((float)(1.0)),glm::vec3(0.0,1.0,0.0));
+		planet.draw();
 
 		//CUBEMAP
 		cubeMapShader.use();
