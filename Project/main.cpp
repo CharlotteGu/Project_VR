@@ -22,7 +22,7 @@ void processInput(GLFWwindow* window);
 void loadCubemapFace(const char * file, const GLenum& targetCube);
 
 
-Camera camera(glm::vec3(0.0, 0.0, 0.1));
+Camera camera(glm::vec3(0.1, 0.1, 0.0));
 
 int main(int argc, char* argv[])
 {
@@ -225,7 +225,6 @@ int main(int argc, char* argv[])
 	glm::mat4 modelSun = glm::mat4(1.0);
 	modelSun = glm::translate(modelSun, glm::vec3(0.0, 0.0, -5.0));
 	modelSun = glm::scale(modelSun, glm::vec3(0.85, 0.85, 0.85));
-
 	glm::mat4 inverseModelSun = glm::transpose(glm::inverse(modelSun));
 
 	//planet model
@@ -233,6 +232,10 @@ int main(int argc, char* argv[])
 	modelPlanet = glm::translate(modelPlanet, glm::vec3(0.3, 0.3, -2.0));
 	modelPlanet = glm::scale(modelPlanet, glm::vec3(0.4, 0.4, 0.4));
 	glm::mat4 inverseModelPlanet = glm::transpose(glm::inverse(modelPlanet));
+
+	glm::mat4 rotationPlanet = glm::mat4(1.0);
+	rotationPlanet = glm::rotate(rotationPlanet, glm::radians((float)(1.0)),glm::vec3(0.0,1.0,0.0));
+	
 
 	//camera info
 	glm::mat4 view = camera.GetViewMatrix();
@@ -295,10 +298,11 @@ int main(int argc, char* argv[])
 		//PLANET
 			//give sun information to shaders
 		shaderPlanet.use();
-		shaderPlanet.setMatrix4("M", modelPlanet);
+		shaderPlanet.setMatrix4("M", modelPlanet); //try to do rotation in the rendering
 		shaderPlanet.setMatrix4("itM", inverseModelPlanet);
 		shaderPlanet.setMatrix4("V", view);
 		shaderPlanet.setMatrix4("P", perspective);
+		shaderPlanet.setMatrix4("R", rotationPlanet);
 		shaderPlanet.setVector3f("u_view_pos", camera.Position);
 			//light
 		auto deltaPlanet = light_pos + glm::vec3(0.0,0.0,2 * std::sin(now));
@@ -309,8 +313,9 @@ int main(int argc, char* argv[])
 		glBindTexture(GL_TEXTURE_2D, texturePlanet);
 			//show the result
 		glDepthFunc(GL_LEQUAL); //Show the object even if it's depth is equal to the depht of the object already present
-		//modelPlanet = glm::translate(modelPlanet, glm::vec3(0.1,0.0,0.0));
-		modelPlanet = glm::rotate(modelPlanet,glm::radians((float)(1.0)),glm::vec3(0.0,2.0,0.0));
+		modelPlanet = glm::translate(modelPlanet, glm::vec3(0.1,0.0,0.0));
+		modelPlanet = glm::rotate(modelPlanet,glm::radians((float)(1.0)),glm::vec3(0.0,4.0,0.0));
+		rotationPlanet = glm::rotate(rotationPlanet,glm::radians((float)(0.5)),glm::vec3(0.0,4.0,0.0));
 		planet.draw();
 
 		//CUBEMAP
