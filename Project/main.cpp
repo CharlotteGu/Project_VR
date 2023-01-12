@@ -129,6 +129,44 @@ int main(int argc, char* argv[])
 	stbi_image_free(data);
 	stbi_set_flip_vertically_on_load(false);
 
+/*------------------ Dead Planet handling ------------------ */
+	char DeadplanetV[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/deadPlanetV.txt";	
+	char DeadplanetF[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/deadPlanetF.txt";
+	Shader shaderDeadPlanet(DeadplanetV, DeadplanetF);
+
+	/*GLuint texturePlanet;
+	glGenTextures(1, &texturePlanet);
+	glBindTexture(GL_TEXTURE_2D, texturePlanet);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	stbi_set_flip_vertically_on_load(true);
+
+	char texPlanet[128] = PATH_TO_TEXTURE "/planet.jpg";
+	data = stbi_load(texPlanet, &imWidth, &imHeight, &imNrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imWidth, imHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Failed to Load texture" << std::endl;
+		const char* reason = stbi_failure_reason();
+		std::cout << reason << std::endl;
+	}*/
+
+	char pathDeadPlanet[] = PATH_TO_OBJECTS "/sphere_smooth.obj";
+	Object deadPlanet(pathDeadPlanet);
+	deadPlanet.makeObject(shaderDeadPlanet);
+
+	/*
+	//clean up texture
+	stbi_image_free(data);
+	stbi_set_flip_vertically_on_load(false);*/
+
 /*------------------ Cubmap handling ------------------ */
 	const std::string sourceVCubeMap = "#version 330 core\n"
 		"in vec3 position; \n"
@@ -163,8 +201,8 @@ int main(int argc, char* argv[])
 		"FragColor = texture(cubemapSampler,texCoord_v); \n"
 		"} \n";
 
-	char cubemapV[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/cubemapV.txt";	
-	char cubemapF[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/cubemapF.txt";
+	//char cubemapV[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/cubemapV.txt";	
+	//char cubemapF[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/cubemapF.txt";
 	Shader cubeMapShader = Shader(sourceVCubeMap, sourceFCubeMap);
 
 	char pathCube[] = PATH_TO_OBJECTS "/cube.obj";
@@ -224,7 +262,7 @@ int main(int argc, char* argv[])
 	//sun model
 	glm::mat4 modelSun = glm::mat4(1.0);
 	modelSun = glm::translate(modelSun, glm::vec3(0.0, 0.0, -5.0));
-	modelSun = glm::scale(modelSun, glm::vec3(0.85, 0.85, 0.85));
+	modelSun = glm::scale(modelSun, glm::vec3(0.9, 0.9, 0.9));
 	glm::mat4 inverseModelSun = glm::transpose(glm::inverse(modelSun));
 
 	//planet model
@@ -237,6 +275,13 @@ int main(int argc, char* argv[])
 	rotationPlanet = glm::rotate(rotationPlanet, glm::radians((float)(1.0)),glm::vec3(0.0,1.0,0.0));
 	
 
+	//dead planet model
+	glm::mat4 modelDeadPlanet = glm::mat4(1.0);
+	modelDeadPlanet = glm::translate(modelDeadPlanet, glm::vec3(-1.6, 3.3, -4.0));
+	modelDeadPlanet = glm::scale(modelDeadPlanet, glm::vec3(0.5, 0.5, 0.5));
+	glm::mat4 inverseModelDeadPlanet = glm::transpose(glm::inverse(modelDeadPlanet));
+
+
 	//camera info
 	glm::mat4 view = camera.GetViewMatrix();
 	glm::mat4 perspective = camera.GetProjectionMatrix();
@@ -246,15 +291,15 @@ int main(int argc, char* argv[])
 	float diffuse = 0.5;
 	float specular = 0.8;
 
-	//
-	glm::vec3 materialColour = glm::vec3(0.5f,0.6,0.8);
+	//What is that ?
+	//glm::vec3 materialColour = glm::vec3(0.5f,0.6,0.8);
 	
 
 /*------------------ Passing values to shaderSun ------------------ */
 
 	shaderSun.use();
 	shaderSun.setFloat("shininess", 32.0f);
-	shaderSun.setVector3f("materialColour", materialColour);
+	//shaderSun.setVector3f("materialColour", materialColour);
 	shaderSun.setFloat("light.ambient_strength", ambient);
 	shaderSun.setFloat("light.diffuse_strength", diffuse);
 	shaderSun.setFloat("light.specular_strength", specular);
@@ -296,7 +341,7 @@ int main(int argc, char* argv[])
 		sun.draw();
 
 		//PLANET
-			//give sun information to shaders
+			//give planet information to shaders
 		shaderPlanet.use();
 		shaderPlanet.setMatrix4("M", modelPlanet); //try to do rotation in the rendering
 		shaderPlanet.setMatrix4("itM", inverseModelPlanet);
@@ -317,6 +362,22 @@ int main(int argc, char* argv[])
 		modelPlanet = glm::rotate(modelPlanet,glm::radians((float)(1.0)),glm::vec3(0.0,4.0,0.0));
 		rotationPlanet = glm::rotate(rotationPlanet,glm::radians((float)(0.5)),glm::vec3(0.0,4.0,0.0));
 		planet.draw();
+
+		//DEAD PLANET
+			//give information to shaders
+		shaderDeadPlanet.use();
+		shaderDeadPlanet.setMatrix4("M", modelDeadPlanet); //try to do rotation in the rendering
+		shaderDeadPlanet.setMatrix4("itM", inverseModelDeadPlanet);
+		shaderDeadPlanet.setMatrix4("V", view);
+		shaderDeadPlanet.setMatrix4("P", perspective);
+		shaderDeadPlanet.setVector3f("u_view_pos", camera.Position);
+		/*
+			//light
+		auto deltaPlanet = light_pos + glm::vec3(0.0,0.0,2 * std::sin(now));
+		shaderPlanet.setVector3f("light.light_pos", deltaPlanet);*/
+			//show the result
+		glDepthFunc(GL_LEQUAL); 
+		deadPlanet.draw();
 
 		//CUBEMAP
 		cubeMapShader.use();
