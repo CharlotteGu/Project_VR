@@ -236,11 +236,11 @@ int main(int argc, char* argv[])
 	//order of positive coordinate (based on camera orientation): x=right, y=upward, z=backward
 
 	//light source
-	glm::vec3 light_pos = glm::vec3(0.0, 0.0, -2.0); //same position as sun, such that it is the light source
+	glm::vec3 light_pos = glm::vec3(0.0, 0.0, -5.0); 
 
 	//sun model
 	glm::mat4 modelSun = glm::mat4(1.0);
-	modelSun = glm::translate(modelSun, glm::vec3(0.0, 0.0, -5.0));
+	modelSun = glm::translate(modelSun, light_pos);//same position as light, st it is the source
 	modelSun = glm::scale(modelSun, glm::vec3(0.9, 0.9, 0.9));
 	glm::mat4 inverseModelSun = glm::transpose(glm::inverse(modelSun));
 
@@ -265,30 +265,24 @@ int main(int argc, char* argv[])
 	glm::mat4 view = camera.GetViewMatrix();
 	glm::mat4 perspective = camera.GetProjectionMatrix();
 
+
+/*------------------ Passing values to shaders ------------------ */
+
 	//light parameters
 	float ambient = 0.1;
 	float diffuse = 0.5;
 	float specular = 0.8;
+	glm::vec3 lightColor = glm::vec3(0.8,0.8,0.2);
 
-	//What is that ?
-	//glm::vec3 materialColour = glm::vec3(0.5f,0.6,0.8);
+	shaderPlanet.use();
+	shaderPlanet.setFloat("shininess", 32.0f);
+	shaderPlanet.setFloat("light.ambient_strength", ambient);
+	shaderPlanet.setFloat("light.diffuse_strength", diffuse);
+	shaderPlanet.setFloat("light.specular_strength", specular);
+	shaderPlanet.setVector3f("light.light_pos", light_pos);
+	shaderPlanet.setVector3f("u_light_color", lightColor);
+
 	
-
-/*------------------ Passing values to shaderSun ------------------ */
-
-	shaderSun.use();
-	shaderSun.setFloat("shininess", 32.0f);
-	//shaderSun.setVector3f("materialColour", materialColour);
-	shaderSun.setFloat("light.ambient_strength", ambient);
-	shaderSun.setFloat("light.diffuse_strength", diffuse);
-	shaderSun.setFloat("light.specular_strength", specular);
-	shaderSun.setFloat("light.constant", 1.0);
-	shaderSun.setFloat("light.linear", 0.14);
-	shaderSun.setFloat("light.quadratic", 0.07);
-
-	//shaderDeadPlanet.setFloat("refractionIndice", 1.52); //iced planet
-	
-
 /*------------------ Rendering loop ------------------ */
 	glfwSwapInterval(1);
 	while (!glfwWindowShouldClose(window)) {
@@ -308,9 +302,6 @@ int main(int argc, char* argv[])
 		shaderSun.setMatrix4("V", view);
 		shaderSun.setMatrix4("P", perspective);
 		shaderSun.setVector3f("u_view_pos", camera.Position);
-			//light
-		auto deltaSun = light_pos + glm::vec3(0.0,0.0,2 * std::sin(now));
-		shaderSun.setVector3f("light.light_pos", deltaSun);
 			//texture
 		shaderSun.setInteger("u_texture", 0);
 		glActiveTexture(GL_TEXTURE0);
@@ -328,9 +319,6 @@ int main(int argc, char* argv[])
 		shaderPlanet.setMatrix4("P", perspective);
 		shaderPlanet.setMatrix4("R", rotationPlanet);
 		shaderPlanet.setVector3f("u_view_pos", camera.Position);
-			//light
-		auto deltaPlanet = light_pos + glm::vec3(0.0,0.0,2 * std::sin(now));
-		shaderPlanet.setVector3f("light.light_pos", deltaPlanet);
 			//texture
 		shaderPlanet.setInteger("u_texture", 0);
 		glActiveTexture(GL_TEXTURE0);
@@ -350,10 +338,6 @@ int main(int argc, char* argv[])
 		shaderDeadPlanet.setMatrix4("V", view);
 		shaderDeadPlanet.setMatrix4("P", perspective);
 		shaderDeadPlanet.setVector3f("u_view_pos", camera.Position);
-		/*
-			//light
-		auto deltaPlanet = light_pos + glm::vec3(0.0,0.0,2 * std::sin(now));
-		shaderPlanet.setVector3f("light.light_pos", deltaPlanet);*/
 			//show the result
 		glDepthFunc(GL_LEQUAL); 
 		deadPlanet.draw();
