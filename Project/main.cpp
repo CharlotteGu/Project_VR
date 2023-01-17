@@ -313,11 +313,11 @@ int main(int argc, char* argv[])
 		//PLANET
 			//give planet information to shaders
 		shaderPlanet.use();
-		shaderPlanet.setMatrix4("M", modelPlanet); //try to do rotation in the rendering
-		shaderPlanet.setMatrix4("itM", inverseModelPlanet);
+		//shaderPlanet.setMatrix4("M", modelPlanet); 
+		//shaderPlanet.setMatrix4("itM", inverseModelPlanet);
 		shaderPlanet.setMatrix4("V", view);
 		shaderPlanet.setMatrix4("P", perspective);
-		shaderPlanet.setMatrix4("R", rotationPlanet);
+		//shaderPlanet.setMatrix4("R", rotationPlanet);
 		shaderPlanet.setVector3f("u_view_pos", camera.Position);
 			//texture
 		shaderPlanet.setInteger("u_texture", 0);
@@ -328,6 +328,10 @@ int main(int argc, char* argv[])
 		modelPlanet = glm::translate(modelPlanet, glm::vec3(0.1,0.0,0.0));
 		modelPlanet = glm::rotate(modelPlanet,glm::radians((float)(1.0)),glm::vec3(0.0,4.0,0.0));
 		rotationPlanet = glm::rotate(rotationPlanet,glm::radians((float)(0.5)),glm::vec3(0.0,4.0,0.0));
+		glm::mat4 finalPos = modelPlanet * rotationPlanet;
+		shaderPlanet.setMatrix4("M", finalPos);
+		inverseModelPlanet = glm::transpose(glm::inverse(finalPos));
+		shaderPlanet.setMatrix4("itM", inverseModelPlanet);
 		planet.draw();
 
 		//DEAD PLANET
