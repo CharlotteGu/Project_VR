@@ -277,7 +277,7 @@ int main(int argc, char* argv[])
 
 	//dead planet model
 	glm::mat4 modelDeadPlanet = glm::mat4(1.0);
-	modelDeadPlanet = glm::translate(modelDeadPlanet, glm::vec3(-1.6, 3.3, -4.0));
+	modelDeadPlanet = glm::translate(modelDeadPlanet, glm::vec3(-0.6, 1.3, -4.0));
 	modelDeadPlanet = glm::scale(modelDeadPlanet, glm::vec3(0.5, 0.5, 0.5));
 	glm::mat4 inverseModelDeadPlanet = glm::transpose(glm::inverse(modelDeadPlanet));
 
@@ -307,7 +307,7 @@ int main(int argc, char* argv[])
 	shaderSun.setFloat("light.linear", 0.14);
 	shaderSun.setFloat("light.quadratic", 0.07);
 
-
+	shaderDeadPlanet.setFloat("refractionIndice", 1.52); //iced planet
 	
 
 /*------------------ Rendering loop ------------------ */
