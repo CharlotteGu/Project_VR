@@ -22,7 +22,7 @@ void processInput(GLFWwindow* window);
 void loadCubemapFace(const char * file, const GLenum& targetCube);
 
 
-Camera camera(glm::vec3(0.1, 0.1, 0.0));
+Camera camera(glm::vec3(0.0, 0.0, 0.0));
 
 int main(int argc, char* argv[])
 {
@@ -134,38 +134,13 @@ int main(int argc, char* argv[])
 	char DeadplanetF[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/deadPlanetF.txt";
 	Shader shaderDeadPlanet(DeadplanetV, DeadplanetF);
 
-	/*GLuint texturePlanet;
-	glGenTextures(1, &texturePlanet);
-	glBindTexture(GL_TEXTURE_2D, texturePlanet);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	stbi_set_flip_vertically_on_load(true);
-
-	char texPlanet[128] = PATH_TO_TEXTURE "/planet.jpg";
-	data = stbi_load(texPlanet, &imWidth, &imHeight, &imNrChannels, 0);
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imWidth, imHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else {
-		std::cout << "Failed to Load texture" << std::endl;
-		const char* reason = stbi_failure_reason();
-		std::cout << reason << std::endl;
-	}*/
-
-	char pathDeadPlanet[] = PATH_TO_OBJECTS "/sphere_smooth.obj";
+	char pathDeadPlanet[] = PATH_TO_OBJECTS "/sphere_extremely_coarse.obj"; //todo: play with smoothness
 	Object deadPlanet(pathDeadPlanet);
 	deadPlanet.makeObject(shaderDeadPlanet);
 
-	/*
-	//clean up texture
-	stbi_image_free(data);
-	stbi_set_flip_vertically_on_load(false);*/
+	/*char pathDeadPlanet2[] = PATH_TO_OBJECTS "/sphere_coarse.obj";
+	Object deadPlanet2(pathDeadPlanet2);
+	deadPlanet2.makeObject(shaderDeadPlanet2);*/
 
 /*------------------ Cubmap handling ------------------ */
 	const std::string sourceVCubeMap = "#version 330 core\n"
@@ -224,14 +199,15 @@ int main(int argc, char* argv[])
 	//stbi_set_flip_vertically_on_load(true);
 
 	std::string pathToCubeMap = PATH_TO_TEXTURE "/cubemaps/interstellar/";
+	std::string extension = ".png";
 
 	std::map<std::string, GLenum> facesToLoad = { 
-		{pathToCubeMap + "posx.png",GL_TEXTURE_CUBE_MAP_POSITIVE_X},
-		{pathToCubeMap + "posy.png",GL_TEXTURE_CUBE_MAP_POSITIVE_Y},
-		{pathToCubeMap + "posz.png",GL_TEXTURE_CUBE_MAP_POSITIVE_Z},
-		{pathToCubeMap + "negx.png",GL_TEXTURE_CUBE_MAP_NEGATIVE_X},
-		{pathToCubeMap + "negy.png",GL_TEXTURE_CUBE_MAP_NEGATIVE_Y},
-		{pathToCubeMap + "negz.png",GL_TEXTURE_CUBE_MAP_NEGATIVE_Z},
+		{pathToCubeMap + "posx" + extension,GL_TEXTURE_CUBE_MAP_POSITIVE_X},
+		{pathToCubeMap + "posy" + extension,GL_TEXTURE_CUBE_MAP_POSITIVE_Y},
+		{pathToCubeMap + "posz" + extension,GL_TEXTURE_CUBE_MAP_POSITIVE_Z},
+		{pathToCubeMap + "negx" + extension,GL_TEXTURE_CUBE_MAP_NEGATIVE_X},
+		{pathToCubeMap + "negy" + extension,GL_TEXTURE_CUBE_MAP_NEGATIVE_Y},
+		{pathToCubeMap + "negz" + extension,GL_TEXTURE_CUBE_MAP_NEGATIVE_Z},
 	};
 	//load the six faces
 	for (std::pair<std::string, GLenum> pair : facesToLoad) {
@@ -256,6 +232,9 @@ int main(int argc, char* argv[])
 	};
 
 /*------------------ Camera elements + light + potential uniforme ------------------ */
+
+	//order of positive coordinate (based on camera orientation): x=right, y=upward, z=backward
+
 	//light source
 	glm::vec3 light_pos = glm::vec3(0.0, 0.0, -2.0); //same position as sun, such that it is the light source
 
@@ -267,7 +246,7 @@ int main(int argc, char* argv[])
 
 	//planet model
 	glm::mat4 modelPlanet = glm::mat4(1.0);
-	modelPlanet = glm::translate(modelPlanet, glm::vec3(0.3, 0.3, -2.0));
+	modelPlanet = glm::translate(modelPlanet, glm::vec3(0.3, -0.3, -2.0));
 	modelPlanet = glm::scale(modelPlanet, glm::vec3(0.4, 0.4, 0.4));
 	glm::mat4 inverseModelPlanet = glm::transpose(glm::inverse(modelPlanet));
 
@@ -277,7 +256,7 @@ int main(int argc, char* argv[])
 
 	//dead planet model
 	glm::mat4 modelDeadPlanet = glm::mat4(1.0);
-	modelDeadPlanet = glm::translate(modelDeadPlanet, glm::vec3(-0.6, 1.3, -4.0));
+	modelDeadPlanet = glm::translate(modelDeadPlanet, glm::vec3(3.0, 1.5, -7.0));
 	modelDeadPlanet = glm::scale(modelDeadPlanet, glm::vec3(0.5, 0.5, 0.5));
 	glm::mat4 inverseModelDeadPlanet = glm::transpose(glm::inverse(modelDeadPlanet));
 
@@ -307,7 +286,7 @@ int main(int argc, char* argv[])
 	shaderSun.setFloat("light.linear", 0.14);
 	shaderSun.setFloat("light.quadratic", 0.07);
 
-	shaderDeadPlanet.setFloat("refractionIndice", 1.52); //iced planet
+	//shaderDeadPlanet.setFloat("refractionIndice", 1.52); //iced planet
 	
 
 /*------------------ Rendering loop ------------------ */
