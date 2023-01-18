@@ -397,6 +397,8 @@ int main(int argc, char* argv[])
 		shaderSun.setMatrix4("V", view);
 		shaderSun.setMatrix4("P", perspective);
 		shaderSun.setVector3f("u_view_pos", camera.Position);
+		float var_light = std::max(std::sin(1.2*now)+0.5, 0.4);
+		shaderSun.setFloat("var_light", var_light);
 			//texture
 		shaderSun.setInteger("u_texture", 0);
 		glActiveTexture(GL_TEXTURE0);
