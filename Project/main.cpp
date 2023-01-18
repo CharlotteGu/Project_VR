@@ -167,15 +167,21 @@ int main(int argc, char* argv[])
 /*------------------ Dead Planet handling ------------------ */
 	char DeadplanetV[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/deadPlanetV.txt";	
 	char DeadplanetF[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/deadPlanetF.txt";
+	
 	Shader shaderDeadPlanet(DeadplanetV, DeadplanetF);
-
 	char pathDeadPlanet[] = PATH_TO_OBJECTS "/sphere_extremely_coarse.obj"; //todo: play with smoothness
 	Object deadPlanet(pathDeadPlanet);
 	deadPlanet.makeObject(shaderDeadPlanet);
 
-	/*char pathDeadPlanet2[] = PATH_TO_OBJECTS "/sphere_coarse.obj";
+	Shader shaderDeadPlanet2(DeadplanetV, DeadplanetF);
+	char pathDeadPlanet2[] = PATH_TO_OBJECTS "/sphere_coarse.obj";
 	Object deadPlanet2(pathDeadPlanet2);
-	deadPlanet2.makeObject(shaderDeadPlanet2);*/
+	deadPlanet2.makeObject(shaderDeadPlanet2);
+
+	Shader shaderDeadPlanet3(DeadplanetV, DeadplanetF);
+	char pathDeadPlanet3[] = PATH_TO_OBJECTS "/sphere_smooth.obj";
+	Object deadPlanet3(pathDeadPlanet3);
+	deadPlanet3.makeObject(shaderDeadPlanet3);
 
 /*------------------ Cubmap handling ------------------ */
 	const std::string sourceVCubeMap = "#version 330 core\n"
@@ -301,9 +307,21 @@ int main(int argc, char* argv[])
 
 	//dead planet model
 	glm::mat4 modelDeadPlanet = glm::mat4(1.0);
-	modelDeadPlanet = glm::translate(modelDeadPlanet, glm::vec3(3.0, 1.5, -7.0));
-	modelDeadPlanet = glm::scale(modelDeadPlanet, glm::vec3(0.5, 0.5, 0.5));
+	modelDeadPlanet = glm::translate(modelDeadPlanet, glm::vec3(3.0, 4.5, -8.0));
+	modelDeadPlanet = glm::scale(modelDeadPlanet, glm::vec3(0.6, 0.6, 0.6));
 	glm::mat4 inverseModelDeadPlanet = glm::transpose(glm::inverse(modelDeadPlanet));
+
+	//dead planet2 model
+	glm::mat4 modelDeadPlanet2 = glm::mat4(1.0);
+	modelDeadPlanet2 = glm::translate(modelDeadPlanet2, glm::vec3(0.0, 4.5, -8.0));
+	modelDeadPlanet2 = glm::scale(modelDeadPlanet2, glm::vec3(0.6, 0.6, 0.6));
+	glm::mat4 inverseModelDeadPlanet2 = glm::transpose(glm::inverse(modelDeadPlanet2));
+
+	//dead planet3 model
+	glm::mat4 modelDeadPlanet3 = glm::mat4(1.0);
+	modelDeadPlanet3 = glm::translate(modelDeadPlanet3, glm::vec3(1.5, 4.5, -10.0));
+	modelDeadPlanet3 = glm::scale(modelDeadPlanet3, glm::vec3(0.6, 0.6, 0.6));
+	glm::mat4 inverseModelDeadPlanet3 = glm::transpose(glm::inverse(modelDeadPlanet3));
 
 
 	//camera info
@@ -342,6 +360,22 @@ int main(int argc, char* argv[])
 	shaderDeadPlanet.setFloat("light.specular_strength", specular);
 	shaderDeadPlanet.setVector3f("light.light_pos", light_pos);
 	shaderDeadPlanet.setVector3f("u_light_color", light_color);
+
+	shaderDeadPlanet2.use();
+	shaderDeadPlanet2.setFloat("shininess", 18.0f);
+	shaderDeadPlanet2.setFloat("light.ambient_strength", 0.5); 	//higher than other st we better see reflection
+	shaderDeadPlanet2.setFloat("light.diffuse_strength", diffuse);
+	shaderDeadPlanet2.setFloat("light.specular_strength", specular);
+	shaderDeadPlanet2.setVector3f("light.light_pos", light_pos);
+	shaderDeadPlanet2.setVector3f("u_light_color", light_color);
+
+	shaderDeadPlanet3.use();
+	shaderDeadPlanet3.setFloat("shininess", 16.0f);
+	shaderDeadPlanet3.setFloat("light.ambient_strength", 0.5); 	//higher than other st we better see reflection
+	shaderDeadPlanet3.setFloat("light.diffuse_strength", diffuse);
+	shaderDeadPlanet3.setFloat("light.specular_strength", specular);
+	shaderDeadPlanet3.setVector3f("light.light_pos", light_pos);
+	shaderDeadPlanet3.setVector3f("u_light_color", light_color);
 
 	
 /*------------------ Rendering loop ------------------ */
@@ -420,7 +454,7 @@ int main(int argc, char* argv[])
 		//DEAD PLANET
 			//give information to shaders
 		shaderDeadPlanet.use();
-		shaderDeadPlanet.setMatrix4("M", modelDeadPlanet); //try to do rotation in the rendering
+		shaderDeadPlanet.setMatrix4("M", modelDeadPlanet); 
 		shaderDeadPlanet.setMatrix4("itM", inverseModelDeadPlanet);
 		shaderDeadPlanet.setMatrix4("V", view);
 		shaderDeadPlanet.setMatrix4("P", perspective);
@@ -428,6 +462,30 @@ int main(int argc, char* argv[])
 			//show the result
 		glDepthFunc(GL_LEQUAL); 
 		deadPlanet.draw();
+
+		//DEAD PLANET2
+			//give information to shaders
+		shaderDeadPlanet2.use();
+		shaderDeadPlanet2.setMatrix4("M", modelDeadPlanet2); 
+		shaderDeadPlanet2.setMatrix4("itM", inverseModelDeadPlanet2);
+		shaderDeadPlanet2.setMatrix4("V", view);
+		shaderDeadPlanet2.setMatrix4("P", perspective);
+		shaderDeadPlanet2.setVector3f("u_view_pos", camera.Position);
+			//show the result
+		glDepthFunc(GL_LEQUAL); 
+		deadPlanet2.draw();
+
+		//DEAD PLANET3
+			//give information to shaders
+		shaderDeadPlanet3.use();
+		shaderDeadPlanet3.setMatrix4("M", modelDeadPlanet3); 
+		shaderDeadPlanet3.setMatrix4("itM", inverseModelDeadPlanet3);
+		shaderDeadPlanet3.setMatrix4("V", view);
+		shaderDeadPlanet3.setMatrix4("P", perspective);
+		shaderDeadPlanet3.setVector3f("u_view_pos", camera.Position);
+			//show the result
+		glDepthFunc(GL_LEQUAL); 
+		deadPlanet3.draw();
 
 		//CUBEMAP
 		cubeMapShader.use();
