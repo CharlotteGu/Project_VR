@@ -463,6 +463,7 @@ int main(int argc, char* argv[])
 		shaderDeadPlanet.setMatrix4("V", view);
 		shaderDeadPlanet.setMatrix4("P", perspective);
 		shaderDeadPlanet.setVector3f("u_view_pos", camera.Position);
+		shaderDeadPlanet.setFloat("var_light", var_light);
 			//show the result
 		glDepthFunc(GL_LEQUAL); 
 		deadPlanet.draw();
@@ -475,6 +476,7 @@ int main(int argc, char* argv[])
 		shaderDeadPlanet2.setMatrix4("V", view);
 		shaderDeadPlanet2.setMatrix4("P", perspective);
 		shaderDeadPlanet2.setVector3f("u_view_pos", camera.Position);
+		shaderDeadPlanet2.setFloat("var_light", var_light);
 			//show the result
 		glDepthFunc(GL_LEQUAL); 
 		deadPlanet2.draw();
@@ -487,6 +489,7 @@ int main(int argc, char* argv[])
 		shaderDeadPlanet3.setMatrix4("V", view);
 		shaderDeadPlanet3.setMatrix4("P", perspective);
 		shaderDeadPlanet3.setVector3f("u_view_pos", camera.Position);
+		shaderDeadPlanet3.setFloat("var_light", var_light);
 			//show the result
 		glDepthFunc(GL_LEQUAL); 
 		deadPlanet3.draw();
