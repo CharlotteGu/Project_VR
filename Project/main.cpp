@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
 	char DeadplanetF[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/deadPlanetF.txt";
 	Shader shaderDeadPlanet(DeadplanetV, DeadplanetF);
 
-	char pathDeadPlanet[] = PATH_TO_OBJECTS "/sphere_extremely_coarse.obj"; //todo: play with smoothness
+	char pathDeadPlanet[] = PATH_TO_OBJECTS "/sphere_coarse.obj"; //todo: play with smoothness
 	Object deadPlanet(pathDeadPlanet);
 	deadPlanet.makeObject(shaderDeadPlanet);
 
@@ -248,70 +248,6 @@ int main(int argc, char* argv[])
 	for (std::pair<std::string, GLenum> pair : facesToLoad) {
 		loadCubemapFace(pair.first.c_str(), pair.second);
 	}
-
-/*------------------ Particles ------------------ */
-/*struct Particle{
-	glm::vec2 position, velocity;
-	glm::vec4 color;
-	float life;
-
-	Particle(): position(0.0f), velocity(0.0f), color(1.0f), life(0.0f){}
-};
-
-unsigned int nb_particles = 500;
-std::vector<Particle> particles;
-for (unsigned int i = 0; i < nb_particles; ++i){
-	particles.push_back(Particle());
-}
-
-unsigned int lastUsedParticle = 0;
-unsigned int FirstUnusedParticle(){
-    // search from last used particle, this will usually return almost instantly
-    for (unsigned int i = lastUsedParticle; i < nb_particles; ++i) {
-        if (particles[i].life <= 0.0f){
-            lastUsedParticle = i;
-            return i;
-        }
-    }
-    // otherwise, do a linear search
-    for (unsigned int i = 0; i < lastUsedParticle; ++i) {
-        if (particles[i].life <= 0.0f){
-            lastUsedParticle = i;
-            return i;
-        }
-    }
-    // override first particle if all others are alive
-    lastUsedParticle = 0;
-    return 0;
-} 
-
-void RespawnParticle(Particle &particle, GameObject &object, glm::vec2 offset){
-    float random = ((rand() % 100) - 50) / 10.0f;
-    float rColor = 0.5f + ((rand() % 100) / 100.0f);
-    particle.position = object.position + random + offset;
-    particle.color = glm::vec4(rColor, rColor, rColor, 1.0f);
-    particle.life = 1.0f;
-    particle.velocity = object.velocity * 0.1f;
-}
-
-//in rendering ?
-unsigned int nb_new_particles = 3;
-for (unsigned int i=0; i < nb_new_particles; ++i){
-	int unusedPartcile = FirstUnusedParticle();
-	RespawnParticle(particles[unusedParticle], object, offset);
-}
-
-for (unsigned int i = 0; i < nb_particles; ++i)
-{
-    Particle &p = particles[i];
-    p.life -= dt; // reduce life
-    if (p.life > 0.0f)
-    {	// particle is alive, thus update
-        p.position -= p.velocity * dt;
-        p.color.a -= dt * 2.5f;
-    }
-}*/
-
  
 
 
@@ -381,7 +317,7 @@ for (unsigned int i = 0; i < nb_particles; ++i)
 	float ambient = 0.2;
 	float diffuse = 0.5;
 	float specular = 0.8;
-	glm::vec3 light_color = glm::vec3(0.8,0.8,0.2);
+	glm::vec3 light_color = glm::vec3(0.8,0.5,0.0);
 
 	shaderPlanet.use();
 	shaderPlanet.setFloat("shininess", 32.0f);
