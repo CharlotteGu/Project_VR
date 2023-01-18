@@ -413,6 +413,7 @@ int main(int argc, char* argv[])
 		shaderPlanet.setMatrix4("V", view);
 		shaderPlanet.setMatrix4("P", perspective);
 		shaderPlanet.setVector3f("u_view_pos", camera.Position);
+		shaderPlanet.setFloat("var_light", var_light);
 			//texture
 		shaderPlanet.setInteger("u_texture", 0);
 		glActiveTexture(GL_TEXTURE0);
@@ -436,6 +437,7 @@ int main(int argc, char* argv[])
 		shaderPlanet2.setMatrix4("V", view);
 		shaderPlanet2.setMatrix4("P", perspective);
 		shaderPlanet2.setVector3f("u_view_pos", camera.Position);
+		shaderPlanet2.setFloat("var_light", var_light);
 			//texture
 		shaderPlanet2.setInteger("u_texture", 0);
 		glActiveTexture(GL_TEXTURE0);
