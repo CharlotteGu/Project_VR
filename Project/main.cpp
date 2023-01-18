@@ -355,7 +355,7 @@ for (unsigned int i = 0; i < nb_particles; ++i)
 
 	//planet2 model
 	glm::mat4 modelPlanet2 = glm::mat4(1.0);
-	modelPlanet2 = glm::translate(modelPlanet2, glm::vec3(0.0, 0.0, -8.5));
+	modelPlanet2 = glm::translate(modelPlanet2, glm::vec3(0.0, -2.0, -2.0));
 	modelPlanet2 = glm::scale(modelPlanet2, glm::vec3(0.5, 0.5, 0.5));
 	glm::mat4 inverseModelPlanet2 = glm::transpose(glm::inverse(modelPlanet2));
 
@@ -463,8 +463,8 @@ for (unsigned int i = 0; i < nb_particles; ++i)
 
 		glDepthFunc(GL_LEQUAL); //Show the object even if it's depth is equal to the depht of the object already present
 			//rotation around sun
-		modelPlanet2 = glm::translate(modelPlanet2, glm::vec3(0.0,0.13,0.0));
-		modelPlanet2 = glm::rotate(modelPlanet2,glm::radians((float)(1.0)),glm::vec3(1.0,0.0,0.0));
+		modelPlanet2 = glm::translate(modelPlanet2, glm::vec3(0.12,0.0,0.0));
+		modelPlanet2 = glm::rotate(modelPlanet2,glm::radians((float)(0.9)),glm::vec3(0.0,1.0,1.0));
 
 		rotationPlanet2 = glm::rotate(rotationPlanet2,glm::radians((float)(0.7)),glm::vec3(0.0,4.0,0.0));
 		glm::mat4 finalPos2 = modelPlanet2 * rotationPlanet2;
