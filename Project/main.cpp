@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
 	char DeadplanetF[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/deadPlanetF.txt";
 	Shader shaderDeadPlanet(DeadplanetV, DeadplanetF);
 
-	char pathDeadPlanet[] = PATH_TO_OBJECTS "/sphere_coarse.obj"; //todo: play with smoothness
+	char pathDeadPlanet[] = PATH_TO_OBJECTS "/sphere_extremely_coarse.obj"; //todo: play with smoothness
 	Object deadPlanet(pathDeadPlanet);
 	deadPlanet.makeObject(shaderDeadPlanet);
 
@@ -311,7 +311,7 @@ int main(int argc, char* argv[])
 	glm::mat4 perspective = camera.GetProjectionMatrix();
 
 
-/*------------------ Passing values to shaders ------------------ */
+/*------------------ Passing light values to shaders ------------------ */
 
 	//light parameters
 	float ambient = 0.2;
@@ -334,6 +334,14 @@ int main(int argc, char* argv[])
 	shaderPlanet2.setFloat("light.specular_strength", specular);
 	shaderPlanet2.setVector3f("light.light_pos", light_pos);
 	shaderPlanet2.setVector3f("u_light_color", light_color);
+
+	shaderDeadPlanet.use();
+	shaderDeadPlanet.setFloat("shininess", 20.0f);
+	shaderDeadPlanet.setFloat("light.ambient_strength", 0.5); 	//higher than other st we better see reflection
+	shaderDeadPlanet.setFloat("light.diffuse_strength", diffuse);
+	shaderDeadPlanet.setFloat("light.specular_strength", specular);
+	shaderDeadPlanet.setVector3f("light.light_pos", light_pos);
+	shaderDeadPlanet.setVector3f("u_light_color", light_color);
 
 	
 /*------------------ Rendering loop ------------------ */
