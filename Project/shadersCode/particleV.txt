@@ -1,0 +1,13 @@
+#version 330 core
+layout (location = 0) in vec4 vertex; //<vec2 position, vec2 tex_coord>
+out vec2 tex_coord;
+out vec4 particleColor;
+uniform mat4 P;
+uniform vec2 offset;
+uniform vec4 color;
+void main(){ 
+float scale = 10.0f;
+tex_coord = vertex.zw;
+particleColor = color;
+gl_Position = P * vec4((vertex.xy *scale) + offset, 0.0, 1.0);
+}

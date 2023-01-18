@@ -129,6 +129,41 @@ int main(int argc, char* argv[])
 	stbi_image_free(data);
 	stbi_set_flip_vertically_on_load(false);
 
+/*------------------ Second Planet handling ------------------ */	
+
+	Shader shaderPlanet2(planetV, planetF); //re-use the same vertex code, but we'll tune some values differently
+
+	GLuint texturePlanet2;
+	glGenTextures(1, &texturePlanet2);
+	glBindTexture(GL_TEXTURE_2D, texturePlanet2);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	stbi_set_flip_vertically_on_load(true);
+
+	char texPlanet2[128] = PATH_TO_TEXTURE "/moon.jpg";
+	data = stbi_load(texPlanet2, &imWidth, &imHeight, &imNrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imWidth, imHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else {
+		std::cout << "Failed to Load texture" << std::endl;
+		const char* reason = stbi_failure_reason();
+		std::cout << reason << std::endl;
+	}
+
+	Object planet2(pathPlanet);
+	planet2.makeObject(shaderPlanet2);
+
+	//clean up texture
+	stbi_image_free(data);
+	stbi_set_flip_vertically_on_load(false);
+
 /*------------------ Dead Planet handling ------------------ */
 	char DeadplanetV[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/deadPlanetV.txt";	
 	char DeadplanetF[128] = "/Users/cha/Doc/Universite/Informatique/MA2/H502- Virtual reality/Projet/Project/shadersCode/deadPlanetF.txt";
@@ -214,6 +249,71 @@ int main(int argc, char* argv[])
 		loadCubemapFace(pair.first.c_str(), pair.second);
 	}
 
+/*------------------ Particles ------------------ */
+/*struct Particle{
+	glm::vec2 position, velocity;
+	glm::vec4 color;
+	float life;
+
+	Particle(): position(0.0f), velocity(0.0f), color(1.0f), life(0.0f){}
+};
+
+unsigned int nb_particles = 500;
+std::vector<Particle> particles;
+for (unsigned int i = 0; i < nb_particles; ++i){
+	particles.push_back(Particle());
+}
+
+unsigned int lastUsedParticle = 0;
+unsigned int FirstUnusedParticle(){
+    // search from last used particle, this will usually return almost instantly
+    for (unsigned int i = lastUsedParticle; i < nb_particles; ++i) {
+        if (particles[i].life <= 0.0f){
+            lastUsedParticle = i;
+            return i;
+        }
+    }
+    // otherwise, do a linear search
+    for (unsigned int i = 0; i < lastUsedParticle; ++i) {
+        if (particles[i].life <= 0.0f){
+            lastUsedParticle = i;
+            return i;
+        }
+    }
+    // override first particle if all others are alive
+    lastUsedParticle = 0;
+    return 0;
+} 
+
+void RespawnParticle(Particle &particle, GameObject &object, glm::vec2 offset){
+    float random = ((rand() % 100) - 50) / 10.0f;
+    float rColor = 0.5f + ((rand() % 100) / 100.0f);
+    particle.position = object.position + random + offset;
+    particle.color = glm::vec4(rColor, rColor, rColor, 1.0f);
+    particle.life = 1.0f;
+    particle.velocity = object.velocity * 0.1f;
+}
+
+//in rendering ?
+unsigned int nb_new_particles = 3;
+for (unsigned int i=0; i < nb_new_particles; ++i){
+	int unusedPartcile = FirstUnusedParticle();
+	RespawnParticle(particles[unusedParticle], object, offset);
+}
+
+for (unsigned int i = 0; i < nb_particles; ++i)
+{
+    Particle &p = particles[i];
+    p.life -= dt; // reduce life
+    if (p.life > 0.0f)
+    {	// particle is alive, thus update
+        p.position -= p.velocity * dt;
+        p.color.a -= dt * 2.5f;
+    }
+}*/
+
+ 
+
 
 /*------------------ Frame function ------------------ */
 	double prev = 0;
@@ -246,12 +346,21 @@ int main(int argc, char* argv[])
 
 	//planet model
 	glm::mat4 modelPlanet = glm::mat4(1.0);
-	modelPlanet = glm::translate(modelPlanet, glm::vec3(0.3, -0.3, -2.0));
+	modelPlanet = glm::translate(modelPlanet, glm::vec3(0.3, -0.3, -2.5));
 	modelPlanet = glm::scale(modelPlanet, glm::vec3(0.4, 0.4, 0.4));
 	glm::mat4 inverseModelPlanet = glm::transpose(glm::inverse(modelPlanet));
 
 	glm::mat4 rotationPlanet = glm::mat4(1.0);
-	rotationPlanet = glm::rotate(rotationPlanet, glm::radians((float)(1.0)),glm::vec3(0.0,1.0,0.0));
+	//rotationPlanet = glm::rotate(rotationPlanet, glm::radians((float)(1.0)),glm::vec3(0.0,1.0,0.0));
+
+	//planet2 model
+	glm::mat4 modelPlanet2 = glm::mat4(1.0);
+	modelPlanet2 = glm::translate(modelPlanet2, glm::vec3(0.0, 0.0, -8.5));
+	modelPlanet2 = glm::scale(modelPlanet2, glm::vec3(0.5, 0.5, 0.5));
+	glm::mat4 inverseModelPlanet2 = glm::transpose(glm::inverse(modelPlanet2));
+
+	glm::mat4 rotationPlanet2 = glm::mat4(1.0);
+	//rotationPlanet2 = glm::rotate(rotationPlanet2, glm::radians((float)(1.5)),glm::vec3(-1.0,0.0,0.0));
 	
 
 	//dead planet model
@@ -269,10 +378,10 @@ int main(int argc, char* argv[])
 /*------------------ Passing values to shaders ------------------ */
 
 	//light parameters
-	float ambient = 0.1;
+	float ambient = 0.2;
 	float diffuse = 0.5;
 	float specular = 0.8;
-	glm::vec3 lightColor = glm::vec3(0.8,0.8,0.2);
+	glm::vec3 light_color = glm::vec3(0.8,0.8,0.2);
 
 	shaderPlanet.use();
 	shaderPlanet.setFloat("shininess", 32.0f);
@@ -280,7 +389,15 @@ int main(int argc, char* argv[])
 	shaderPlanet.setFloat("light.diffuse_strength", diffuse);
 	shaderPlanet.setFloat("light.specular_strength", specular);
 	shaderPlanet.setVector3f("light.light_pos", light_pos);
-	shaderPlanet.setVector3f("u_light_color", lightColor);
+	shaderPlanet.setVector3f("u_light_color", light_color);
+
+	shaderPlanet2.use();
+	shaderPlanet2.setFloat("shininess", 15.0f);
+	shaderPlanet2.setFloat("light.ambient_strength", ambient);
+	shaderPlanet2.setFloat("light.diffuse_strength", diffuse);
+	shaderPlanet2.setFloat("light.specular_strength", specular);
+	shaderPlanet2.setVector3f("light.light_pos", light_pos);
+	shaderPlanet2.setVector3f("u_light_color", light_color);
 
 	
 /*------------------ Rendering loop ------------------ */
@@ -313,26 +430,48 @@ int main(int argc, char* argv[])
 		//PLANET
 			//give planet information to shaders
 		shaderPlanet.use();
-		//shaderPlanet.setMatrix4("M", modelPlanet); 
-		//shaderPlanet.setMatrix4("itM", inverseModelPlanet);
 		shaderPlanet.setMatrix4("V", view);
 		shaderPlanet.setMatrix4("P", perspective);
-		//shaderPlanet.setMatrix4("R", rotationPlanet);
 		shaderPlanet.setVector3f("u_view_pos", camera.Position);
 			//texture
 		shaderPlanet.setInteger("u_texture", 0);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, texturePlanet);
-			//show the result
+
 		glDepthFunc(GL_LEQUAL); //Show the object even if it's depth is equal to the depht of the object already present
+			//rotation around sun
 		modelPlanet = glm::translate(modelPlanet, glm::vec3(0.1,0.0,0.0));
 		modelPlanet = glm::rotate(modelPlanet,glm::radians((float)(1.0)),glm::vec3(0.0,4.0,0.0));
+
 		rotationPlanet = glm::rotate(rotationPlanet,glm::radians((float)(0.5)),glm::vec3(0.0,4.0,0.0));
 		glm::mat4 finalPos = modelPlanet * rotationPlanet;
 		shaderPlanet.setMatrix4("M", finalPos);
 		inverseModelPlanet = glm::transpose(glm::inverse(finalPos));
 		shaderPlanet.setMatrix4("itM", inverseModelPlanet);
 		planet.draw();
+
+		//PLANET2
+			//give planet information to shaders
+		shaderPlanet2.use();
+		shaderPlanet2.setMatrix4("V", view);
+		shaderPlanet2.setMatrix4("P", perspective);
+		shaderPlanet2.setVector3f("u_view_pos", camera.Position);
+			//texture
+		shaderPlanet2.setInteger("u_texture", 0);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texturePlanet2);
+
+		glDepthFunc(GL_LEQUAL); //Show the object even if it's depth is equal to the depht of the object already present
+			//rotation around sun
+		modelPlanet2 = glm::translate(modelPlanet2, glm::vec3(0.0,0.13,0.0));
+		modelPlanet2 = glm::rotate(modelPlanet2,glm::radians((float)(1.0)),glm::vec3(1.0,0.0,0.0));
+
+		rotationPlanet2 = glm::rotate(rotationPlanet2,glm::radians((float)(0.7)),glm::vec3(0.0,4.0,0.0));
+		glm::mat4 finalPos2 = modelPlanet2 * rotationPlanet2;
+		shaderPlanet2.setMatrix4("M", finalPos2);
+		inverseModelPlanet2 = glm::transpose(glm::inverse(finalPos2));
+		shaderPlanet2.setMatrix4("itM", inverseModelPlanet2);
+		planet2.draw();
 
 		//DEAD PLANET
 			//give information to shaders
