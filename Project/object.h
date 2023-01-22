@@ -15,25 +15,25 @@
 #include<glm/gtc/matrix_transform.hpp>
 
 
-struct Vertex {
-	glm::vec3 Position;
-	glm::vec2 Texture;
-	glm::vec3 Normal;
+struct Vertex { //every vertex is composed of those three elements
+	glm::vec3 Position; //3D coordinate of vertex in space
+	glm::vec2 Texture;	//2D associated texture coordinate for that point
+	glm::vec3 Normal;	//3D vector of the normal (for ex, to see where the exterior is)
 };
 
 
 class Object
 {
 public:
-	std::vector<glm::vec3> positions;
+	std::vector<glm::vec3> positions; //to store every information
 	std::vector<glm::vec2> textures;
 	std::vector<glm::vec3> normals;
-	std::vector<Vertex> vertices;
+	std::vector<Vertex> vertices; //initialize a vector of vertices (which will use info saved in previous vector)
 
 	int numVertices;
 
-	GLuint VBO, VAO;
-	glm::mat4 model = glm::mat4(1.0);
+	GLuint VBO, VAO; //the buffers
+	//glm::mat4 model = glm::mat4(1.0); //the object model but unfortunately, I rather created a new one in main each time...
 
 	Object(const char* path) {
 		// Get the object information from the file
@@ -43,12 +43,12 @@ public:
 			std::cerr << "Error code: " << strerror(errno); // Get some info as to why
 		}
 		std::string line;
-		while (std::getline(infile, line))
+		while (std::getline(infile, line)) //read line by line and handle it accordingly to the type (vertex, normal, texture or face)
 		{
 			std::istringstream iss(line);
 			std::string indice;
 			iss >> indice;
-			if (indice == "v") {
+			if (indice == "v") {	
 				float x, y, z;
 				iss >> x >> y >> z;
 				positions.push_back(glm::vec3(x, y, z));
@@ -64,7 +64,7 @@ public:
 				iss >> u >> v;
 				textures.push_back(glm::vec2(u, v));
 			}
-			else if (indice == "f") {
+			else if (indice == "f") { 	//for the faces, we combine three vertices, each with its position, normal and texture
 				std::string f1, f2, f3;
 				iss >> f1 >> f2 >> f3;
 
@@ -114,12 +114,12 @@ public:
 			}
 		}
 		std::cout << "Load model with " << vertices.size() << " vertices" << std::endl;
-		infile.close();
-		numVertices = vertices.size();
+		infile.close();		//do not forget to close the file 
+		numVertices = vertices.size();	//keep track of the number of vertices we have
 	}
 
 	void makeObject(Shader shader, bool texture = true, bool normal = true) {
-		// Put the object information in the buffer for the shader to read
+		// Put the object information (info of every vertex) in the buffer (data) for the shader to read
 		float* data = new float[8 * numVertices];
 		for (int i = 0; i < numVertices; i++) {
 			Vertex v = vertices.at(i);
@@ -135,44 +135,44 @@ public:
 			data[i * 8 + 7] = v.Normal.z;
 		}
 
-		glGenVertexArrays(1, &VAO);
-		glGenBuffers(1, &VBO);
+		glGenVertexArrays(1, &VAO); //create an array of 1 array (VA0)
+		glGenBuffers(1, &VBO); //create one buffer (VBO)
 
 		//define VBO and VAO as active buffer and active vertex array
-		glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * numVertices, data, GL_STATIC_DRAW);
+		glBindVertexArray(VAO);	//say that we work with that vertex array 
+		glBindBuffer(GL_ARRAY_BUFFER, VBO); //say that we work with that buffer
+		glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * numVertices, data, GL_STATIC_DRAW); //put data into buffer
 
-		auto att_pos = glGetAttribLocation(shader.ID, "position");
-		glEnableVertexAttribArray(att_pos);
-		glVertexAttribPointer(att_pos, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)0);
+		auto att_pos = glGetAttribLocation(shader.ID, "position"); //Explain how to interpret the buffer; position is the name in the vShader !
+		glEnableVertexAttribArray(att_pos);	
+		glVertexAttribPointer(att_pos, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)0); //(attr, #elements to read, type, if normalized, how many bytes we skip, byte offset of first component)
 
 		
-		if (texture) {
+		if (texture) {	//if we asked for texture, we also create an attribute for 
 			auto att_tex = glGetAttribLocation(shader.ID, "tex_coord");
 			glEnableVertexAttribArray(att_tex);
-			glVertexAttribPointer(att_tex, 2, GL_FLOAT, false, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+			glVertexAttribPointer(att_tex, 2, GL_FLOAT, false, 8 * sizeof(float), (void*)(3 * sizeof(float))); //NB: here only two coordinates to get and we have an offset
 		}
 		
-		if (normal){
+		if (normal){ //same for normal
 			auto att_norm = glGetAttribLocation(shader.ID, "normal");
 			glEnableVertexAttribArray(att_norm);
 			glVertexAttribPointer(att_norm, 3, GL_FLOAT, false, 8*sizeof(float), (void*)((5)*sizeof(float)));
 		}
 		
-		auto att_col = glGetAttribLocation(shader.ID, "normal");
+		/*auto att_col = glGetAttribLocation(shader.ID, "normal"); //only repeats the above...
 		glEnableVertexAttribArray(att_col);
-		glVertexAttribPointer(att_col, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)(5 * sizeof(float)));
+		glVertexAttribPointer(att_col, 3, GL_FLOAT, false, 8 * sizeof(float), (void*)(5 * sizeof(float)));*/
 		
-		//desactive the buffer
+		//desactive the buffer (and the array)
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindVertexArray(0);
-		delete[] data;
+		delete[] data; //empty the data because we do not need to keep them 
 	}
 
 	void draw() {
-		glBindVertexArray(this->VAO);
-		glDrawArrays(GL_TRIANGLES, 0, numVertices);
+		glBindVertexArray(this->VAO); //get the right vertex array
+		glDrawArrays(GL_TRIANGLES, 0, numVertices); //render primites
 	}
 };
 #endif

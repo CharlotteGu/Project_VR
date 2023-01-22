@@ -1,6 +1,6 @@
 #version 330 core
-out vec4 FragColor;
-precision mediump float; 
+out vec4 FragColor; //will only output the color (here texture)
+precision mediump float; //specify GPU precision
 in vec3 v_frag_coord;
 in vec3 v_normal;  
 in vec2 v_tex; 
@@ -8,7 +8,7 @@ uniform vec3 u_view_pos;
 uniform sampler2D u_texture; 
 uniform float var_light;
 void main() { 
-vec3 N = normalize(v_normal);
-vec3 V = normalize(u_view_pos - v_frag_coord);
-FragColor = vec4(vec3(var_light), 1.0) * texture(u_texture, v_tex); 
+vec3 N = normalize(v_normal); 
+vec3 V = normalize(u_view_pos - v_frag_coord); //normalize (camera-modelview position of object)
+FragColor = vec4(vec3(var_light), 1.0) * texture(u_texture, v_tex); //multiply the texture with the light intensity to see the pulse
 }

@@ -1,18 +1,18 @@
 #version 330 core
-in vec3 position;
+in vec3 position; //1) read one vertex at the time (from buffer) NB: local coordinates
 in vec2 tex_coord;
 in vec3 normal;
-out vec3 v_frag_coord;
+out vec3 v_frag_coord;  //2) send information to the fragment shader
 out vec2 v_tex;
 out vec3 v_normal;
-uniform mat4 M;
+uniform mat4 M; //3) get info via uniforme in the rendering loop
 uniform mat4 itM;
 uniform mat4 V;
 uniform mat4 P;
 void main(){ 
-vec4 frag_coord = M*vec4(position, 1.0);
-gl_Position = P*V*frag_coord;
-v_normal = vec3(itM*vec4(normal, 1.0));
-v_frag_coord = frag_coord.xyz;
-v_tex = tex_coord;
+vec4 frag_coord = M*vec4(position, 1.0); //apply the model (scaling, rotation & translation) transfo to the position into world coordinates
+gl_Position = P*V*frag_coord;   //adapt the position with the view of the camera (where we look) and its perspective (manipulate w coordin to give depth impression)
+v_normal = vec3(itM*vec4(normal, 1.0)); //also apply the modelView to the normals
+v_frag_coord = frag_coord.xyz; //output the object coordinates
+v_tex = tex_coord; //output the texture coordinates
 }

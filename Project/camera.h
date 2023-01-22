@@ -16,11 +16,11 @@ enum Camera_Movement {
 };
 
 // Default camera values
-const float YAW = -90.0f;
+const float YAW = -90.0f; //the three rotations angles
 const float PITCH = 0.0f;
 const float SPEED = 2.5f;
-const float SENSITIVITY = 0.1f;
-const float ZOOM = 45.0f;
+const float SENSITIVITY = 0.1f; //how quickly it reacts 
+const float ZOOM = 45.0f;   //how wide is our field of view
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
@@ -28,10 +28,10 @@ class Camera
 {
 public:
     // camera Attributes
-    glm::vec3 Position;
-    glm::vec3 Front;
-    glm::vec3 Up;
-    glm::vec3 Right;
+    glm::vec3 Position; //where it is
+    glm::vec3 Front;    //what it faces
+    glm::vec3 Up;   //where is the "sky"
+    glm::vec3 Right;  //positive x axis   
     glm::vec3 WorldUp;
     // euler Angles
     float Yaw; //rotationne debout vers un coté
@@ -63,7 +63,7 @@ public:
     // returns the view matrix calculated using Euler Angles and the LookAt Matrix
     glm::mat4 GetViewMatrix()
     {
-        return glm::lookAt(this->Position, this->Position + this->Front, this->Up);
+        return glm::lookAt(this->Position, this->Position + this->Front, this->Up); //compute the view (in the opposite direction from the mvt etc) based on cam pos, target pos and the up vector
     }
 
     glm::mat4 GetProjectionMatrix(float fov=45.0, float ratio=1.0, float near=0.01, float far=100.0)
@@ -107,14 +107,6 @@ public:
 
     }
 
-    // processes input received from a mouse input system. Expects the offset value in both the x and y direction.
-    void ProcessMouseMovement(float xoffset, float yoffset, GLboolean constrainPitch = true)
-    {
-        /* The motivated students can implement rotation using the mouse rather than the keyboard
-        * You can draw inspiration from the ProcessKeyboardMovement function
-        */
-    }
-
     // processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
     void ProcessMouseScroll(float yoffset)
     {
@@ -131,13 +123,13 @@ private:
     {
         // calculate the new Front vector
         glm::vec3 front;
-        front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
+        front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));  //need cos(pitch) because influence xz sides
         front.y = sin(glm::radians(Pitch));
         front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
-        Front = glm::normalize(front);
+        Front = glm::normalize(front); // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
         // also re-calculate the Right and Up vector
-        Right = glm::normalize(glm::cross(Front, WorldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-        Up = glm::normalize(glm::cross(Right, Front));
+        Right = glm::normalize(glm::cross(Front, WorldUp));  //use the cross product with the new front vector
+        Up = glm::normalize(glm::cross(Right, Front)); 
     }
 };
 

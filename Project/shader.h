@@ -1,7 +1,7 @@
 #ifndef SHADER_H
 #define SHADER_H
 
-#include <glad/glad.h>
+#include <glad/glad.h> //function loader for opengl
 
 #include <string>
 #include <fstream>
@@ -11,9 +11,9 @@
 class Shader
 {
 public:
-	GLuint ID;
+	GLuint ID; //Unsigned binary integer saving the identifier of the shader
 
-	Shader(const char* vertexPath, const char* fragmentPath)
+	Shader(const char* vertexPath, const char* fragmentPath) //used when code in a file
 	{
         // 1. retrieve the vertex/fragment source code from filePath
         std::string vertexCode;
@@ -43,7 +43,7 @@ public:
         {
             std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ: " << e.what() << std::endl;
         }
-        const char* vShaderCode = vertexCode.c_str();
+        const char* vShaderCode = vertexCode.c_str(); //from string to const char* (not very useful)
         const char* fShaderCode = fragmentCode.c_str();
 
         GLuint vertex = compileShader(vertexCode, GL_VERTEX_SHADER);
@@ -51,7 +51,7 @@ public:
         ID = compileProgram(vertex, fragment);
 	}
 
-    Shader(std::string vShaderCode, std::string fShaderCode)
+    Shader(std::string vShaderCode, std::string fShaderCode) //used when giving directly the string of the shader code
     {
         // Compile both shaders and join them into a program
         GLuint vertex = compileShader(vShaderCode, GL_VERTEX_SHADER);
@@ -59,13 +59,13 @@ public:
         ID = compileProgram(vertex, fragment);
     }
 
-    void use() {
+    void use() { //installs the program object specified by program as part of current rendering state
         glUseProgram(ID);
     }
 
-    // Set of methods to getUniformeLocation for various types
-    void setInteger(const GLchar *name, GLint value) {
-        glUniform1i(glGetUniformLocation(ID, name), value);
+    // Set of methods to getUniformeLocation for various types 
+    void setInteger(const GLchar *name, GLint value) { //Specify the value of a uniform var for the current program object
+        glUniform1i(glGetUniformLocation(ID, name), value); //find the (int) location of the uniform, then assign it with the given value
     }
 
     void setFloat(const GLchar* name, GLfloat value) {
@@ -87,17 +87,17 @@ public:
 private:
     GLuint compileShader(std::string shaderCode, GLenum shaderType)
     {
-        GLuint shader = glCreateShader(shaderType);
-        const char* code = shaderCode.c_str();
-        glShaderSource(shader, 1, &code, NULL);
-        glCompileShader(shader);
+        GLuint shader = glCreateShader(shaderType); //create the object
+        const char* code = shaderCode.c_str();  //cast the code
+        glShaderSource(shader, 1, &code, NULL); //(what shader, 1 element in string array, array of pointers to shader code string, null-terminated)
+        glCompileShader(shader); //compile source code in the shader
 
-        GLchar infoLog[1024];
+        GLchar infoLog[1024]; //buffer to store failure info, if needed
         GLint success;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-        if (!success)
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success); //get the compile status code to check if worked
+        if (!success)   
         {
-            glGetShaderInfoLog(shader, 1024, NULL, infoLog);
+            glGetShaderInfoLog(shader, 1024, NULL, infoLog); //store the log info about the failure
             std::string t = "undetermined";
             if (shaderType == GL_VERTEX_SHADER) {
                 t = "vertex shader";
@@ -112,11 +112,11 @@ private:
 
     GLuint compileProgram(GLuint vertexShader, GLuint fragmentShader)
     {
-        GLuint programID = glCreateProgram();
+        GLuint programID = glCreateProgram(); //create an empty object program
 
-        glAttachShader(programID, vertexShader);
+        glAttachShader(programID, vertexShader); //link the shaders to the program
         glAttachShader(programID, fragmentShader);
-        glLinkProgram(programID);
+        glLinkProgram(programID); //links the program object + create executable of the shaders
 
 
         GLchar infoLog[1024];
